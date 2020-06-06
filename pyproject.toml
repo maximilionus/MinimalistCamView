@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "minimalist-cam-view"
+version = "0.0.1"
+description = ""
+authors = ["maximilionus <xxxarakxxx@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+opencv-python = "^4.2.0"
+pillow = "^7.1.2"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.8.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
