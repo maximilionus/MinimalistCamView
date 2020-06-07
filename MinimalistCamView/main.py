@@ -66,7 +66,7 @@ class MCV_UI(tk.Tk):
             self.__label_cam.configure(image=imgtk)
 
         if self.__pull_frame_loop_enabled:
-            self.__label_cam.after(10, self.__pull_frame_loop)
+            self.__label_cam.after(100, self.__pull_frame_loop)
 
     def __showUI__cam_list(self):
         def update_cam_list():
