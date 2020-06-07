@@ -25,7 +25,7 @@ class MCV_UI(tk.Tk):
         def cam_playswitch():
             if not self.__pull_frame_loop_enabled:
                 self.__pull_frame_loop_enabled = True
-                self.__button_play_switch.config(text=h.U_SYMBOLS['pause'])
+                self.__button_play_switch.config(text=h.U_SYMBOLS['stop'])
                 self.__logger.info('Begin frame pulling.')
                 self.__cam_connect()
                 self.__pull_frame_loop()

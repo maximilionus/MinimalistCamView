@@ -14,7 +14,7 @@ MCVCFG_PROTO = {
 }
 U_SYMBOLS = {
     "play": "\u25B6",
-    "pause": "\u23F8",
+    "stop": "\u23f9",
     "vertical_dots": "\u22EE"
 }
 
