@@ -11,6 +11,10 @@ MCVCFG_PATH_FULL = os.path.join(MCVCFG_PATH, MCVCFG_NAME)
 MCVCFG_PROTO = {
     "cam_list": {}
 }
+U_SYMBOLS = {
+    "play": "\u25B6",
+    "pause": "\u23F8"
+}
 
 
 class MCVConfig:
