@@ -13,7 +13,8 @@ MCVCFG_PROTO = {
 }
 U_SYMBOLS = {
     "play": "\u25B6",
-    "pause": "\u23F8"
+    "pause": "\u23F8",
+    "vertical_dots": "\u22EE"
 }
 
 

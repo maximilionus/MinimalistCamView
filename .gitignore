@@ -10,3 +10,6 @@ __pycache__
 
 # Ignore editable packages
 *.egg-info
+
+# Ignore temp config
+MinimalistCamView/temp_config.py
