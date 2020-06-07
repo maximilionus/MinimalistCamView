@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "minimalist-cam-view"
+name = "MinimalistCamView"
 version = "0.0.1"
 description = ""
 authors = ["maximilionus <xxxarakxxx@gmail.com>"]
@@ -8,6 +8,7 @@ authors = ["maximilionus <xxxarakxxx@gmail.com>"]
 python = "^3.8"
 opencv-python = "^4.2.0"
 pillow = "^7.1.2"
+cx-freeze = "^6.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.2"

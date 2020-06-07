@@ -1,3 +1,12 @@
 # Ignore all cache dirs
-.vscode/
-__pycache__/
+.vscode
+__pycache__
+
+# Ignore log files
+*.log
+
+# Ignore MCV config folder
+**/config
+
+# Ignore editable packages
+*.egg-info
