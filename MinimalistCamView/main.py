@@ -17,8 +17,6 @@ class MCV_UI(tk.Tk):
         self.__logger.info('User Interface is ready')
 
         self.__pull_frame_loop_enabled = False
-        self.__cam_connect()
-        self.__pull_frame_loop()
 
     def __showUI__cam_view(self):
         self.title(h.TITLE_STR)
@@ -28,13 +26,16 @@ class MCV_UI(tk.Tk):
             if not self.__pull_frame_loop_enabled:
                 self.__pull_frame_loop_enabled = True
                 self.__button_play_switch.config(text=h.U_SYMBOLS['pause'])
-                self.__pull_frame_loop()
                 self.__logger.info('Begin frame pulling.')
+                self.__cam_connect()
+                self.__pull_frame_loop()
             else:
                 self.__pull_frame_loop_enabled = False
                 self.__button_play_switch.config(text=h.U_SYMBOLS['play'])
+                self.__cam_capture.release()
                 self.__logger.info('End frame pulling.')
 
+        self.columnconfigure(0, weight=1)
         self.__frame_top = tk.Frame(self, bg="#181818")
         self.__button_play_switch = tk.Button(self.__frame_top, text=h.U_SYMBOLS['play'], width=20, command=cam_playswitch, bg="#404040", fg="#ffffff", relief=tk.FLAT)
         self.__button_play_switch.grid(row=0, column=0, sticky="W")
@@ -43,8 +44,11 @@ class MCV_UI(tk.Tk):
         self.__frame_top.grid(row=0, column=0, sticky="NWE")
 
         # Bottom
-        self.__frame_bot = tk.Frame(self)
-        self.__frame_bot.grid(row=1, column=0)
+        self.rowconfigure(1, weight=1)
+        self.__frame_bot = tk.Frame(self, bg="#181818")
+        self.__frame_bot.rowconfigure(0, weight=1)
+        self.__frame_bot.columnconfigure(0, weight=1)
+        self.__frame_bot.grid(row=1, column=0, sticky="NSEW")
 
         self.__label_cam = tk.Label(self.__frame_bot, bg='#181818')
         self.__label_cam.grid(row=0, column=0, sticky='NSEW')
@@ -53,20 +57,16 @@ class MCV_UI(tk.Tk):
         self.__cam_capture = cv2.VideoCapture(temp_config.CONNECTION)  # TODO: Read from config
 
     def __pull_frame_loop(self):
-        try:
-            _, frame = self.__cam_capture.read()
-        except cv2.error:
-            self.__logger.error("Can't pull frame from camera. Trying again.")
-            self.__pull_frame_loop()
-        else:
+        is_pulled, frame = self.__cam_capture.read()
+        if is_pulled:
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             img = Image.fromarray(cv2image)
             imgtk = ImageTk.PhotoImage(image=img)
             self.__label_cam.imgtk = imgtk
             self.__label_cam.configure(image=imgtk)
 
-            if self.__pull_frame_loop_enabled:
-                self.__label_cam.after(10, self.__pull_frame_loop)
+        if self.__pull_frame_loop_enabled:
+            self.__label_cam.after(10, self.__pull_frame_loop)
 
     def __showUI__cam_list(self):
         def update_cam_list():
@@ -74,11 +74,19 @@ class MCV_UI(tk.Tk):
                 cams = h.MCVConfig.get()["cam_list"].keys()
                 for cam in cams:
                     listbox.insert(tk.END, cam)
-            Thread(target=update_cam_list).start()
+            Thread(target=ucl_thread).start()
 
         root = tk.Toplevel(self)
-        root.title('Settings')
-        listbox = tk.Listbox(root, selectmode=tk.SINGLE)
+        root.geometry('300x500')
+        root.title('Cams')
+        frame_left = tk.Frame(root)
+        frame_left.grid(row=0, column=0, sticky="NSEW")
+        listbox = tk.Listbox(frame_left, selectmode=tk.SINGLE, bg="#181818", fg="#ffffff")
+        listbox.grid(row=0, column=0, sticky="NSEW")
+        frame_left.rowconfigure(0, weight=1)
+        frame_left.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+        root.columnconfigure(0, weight=1)
         update_cam_list()
 
 

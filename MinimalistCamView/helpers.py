@@ -9,6 +9,7 @@ MCVCFG_PATH = "./data/config"
 MCVCFG_NAME = "config.json"
 MCVCFG_PATH_FULL = os.path.join(MCVCFG_PATH, MCVCFG_NAME)
 MCVCFG_PROTO = {
+    "cam_selected": "",
     "cam_list": {}
 }
 U_SYMBOLS = {
