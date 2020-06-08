@@ -66,6 +66,7 @@ class MCV_UI(tk.Tk):
         if is_pulled:
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             img = Image.fromarray(cv2image)
+            img = img.resize((self.__label_cam.winfo_width(), self.__label_cam.winfo_height()), Image.ANTIALIAS)
             imgtk = ImageTk.PhotoImage(image=img)
             self.__label_cam.imgtk = imgtk
             self.__label_cam.configure(image=imgtk)
