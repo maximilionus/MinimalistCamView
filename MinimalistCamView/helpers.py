@@ -5,6 +5,7 @@ import logging
 
 # CONST
 TITLE_STR = "Minimalist Cam View"
+ICON_APP = "./data/icons/mcv_icon.ico"
 MCVCFG_PATH = "./data/config"
 MCVCFG_NAME = "config.json"
 MCVCFG_PATH_FULL = os.path.join(MCVCFG_PATH, MCVCFG_NAME)

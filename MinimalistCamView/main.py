@@ -13,10 +13,11 @@ from MinimalistCamView import temp_config
 class MCV_UI(tk.Tk):
     def __init__(self):
         super().__init__()
-        h.MCVConfig.create()
         self.__logger = logging.getLogger('MCV_UI')
+        h.MCVConfig.create()
+        self.iconbitmap(h.ICON_APP)
         self.__ttk_style = ThemedStyle(self)
-        self.__ttk_style.set_theme('equilux')
+        self.__ttk_style.set_theme('black')
         self.geometry("400x300")
         self.minsize(240, 200)
         self.__showUI__cam_view()
@@ -58,14 +59,37 @@ class MCV_UI(tk.Tk):
 
         self.__label_cam = ttk.Label(self.__frame_bot, justify=tk.CENTER)
         self.__label_cam.grid(row=0, column=0, sticky='NSEW')
+        self.__lcam_text_status = tk.Label(self.__label_cam, text="", fg="#afafaf", bg="#303030", font="40")
+        self.__set_lcam_status(1)
+        self.__label_cam.rowconfigure(0, weight=1)
+        self.__label_cam.columnconfigure(0, weight=1)
 
     def __cam_connect(self):
         self.__cam_capture = cv2.VideoCapture(temp_config.CONNECTION)  # TODO: Read from config
         self.__logger.info("Successfully connected to cam.")
 
+    def __set_lcam_status(self, status: int):
+        """ Set status line
+
+        Args:
+            status (int):
+                0 - Hide status bar.
+                1 - NOT CONNECTED.
+                2 - DISCONNECTED.
+        """
+        if status == 0:
+            self.__lcam_text_status.grid_remove()
+        else:
+            if status == 1:
+                self.__lcam_text_status.config(text='NOT CONNECTED')
+            elif status == 2:
+                self.__lcam_text_status.config(text='DISCONNECTED')
+            self.__lcam_text_status.grid(row=0, column=0, sticky="EW")
+
     def __pull_frame_loop(self):
         is_pulled, frame = self.__cam_capture.read()
         if is_pulled:
+            self.__set_lcam_status(0)
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             img = Image.fromarray(cv2image)
             img_ratio = min(
@@ -75,10 +99,14 @@ class MCV_UI(tk.Tk):
             img = img.resize((round(img.width * img_ratio), round(img.height * img_ratio)), Image.ANTIALIAS)
             imgtk = ImageTk.PhotoImage(image=img)
             self.__label_cam.imgtk = imgtk
-            self.__label_cam.configure(image=imgtk)
+            self.__label_cam.config(image=imgtk)
 
         if self.__pull_frame_loop_enabled:
             self.__label_cam.after(10, self.__pull_frame_loop)
+        else:
+            self.__set_lcam_status(2)
+            del(self.__label_cam.imgtk)
+            self.__label_cam.config(image=None)
 
     def __showUI__cam_list(self):
         def update_cam_list():
@@ -97,6 +125,7 @@ class MCV_UI(tk.Tk):
         root = tk.Toplevel(self)
         root.geometry('300x500')
         root.title('Cams')
+        root.iconbitmap(h.ICON_APP)
         root.protocol("WM_DELETE_WINDOW", on_close)
 
         # Left Frame
@@ -105,7 +134,7 @@ class MCV_UI(tk.Tk):
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
 
-        lb_cams = tk.Listbox(frame_left, bg="#303030", selectmode=tk.SINGLE)
+        lb_cams = tk.Listbox(frame_left, bg="#303030", fg="#bfbfbf", selectmode=tk.SINGLE)
         lb_cams.grid(row=0, column=0, sticky="NSEW")
         lb_cams_scroll = ttk.Scrollbar(frame_left, command=lb_cams.yview)
         lb_cams.config(yscrollcommand=lb_cams_scroll.set)
