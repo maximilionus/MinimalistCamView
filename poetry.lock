@@ -70,8 +70,19 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.2.0"
 
+[[package]]
+category = "main"
+description = "A group of themes for the ttk extensions of Tkinter with a Tkinter.Tk wrapper"
+name = "ttkthemes"
+optional = false
+python-versions = ">=3.5"
+version = "3.0.0"
+
+[package.dependencies]
+pillow = "*"
+
 [metadata]
-content-hash = "d35e6108b2df5dce10ecc5e52b1d287c436d9b48a98d88cd467dd69f898a9688"
+content-hash = "eb8ad06345ed613df3a0371e948beeb67e476f9899b8e0bb569aba8ed66032ec"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -171,4 +182,7 @@ pycodestyle = [
 pyflakes = [
     {file = "pyflakes-2.2.0-py2.py3-none-any.whl", hash = "sha256:0d94e0e05a19e57a99444b6ddcf9a6eb2e5c68d3ca1e98e90707af8152c90a92"},
     {file = "pyflakes-2.2.0.tar.gz", hash = "sha256:35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"},
+]
+ttkthemes = [
+    {file = "ttkthemes-3.0.0.tar.gz", hash = "sha256:178dec94b4e3342b0a6f4b2adfaf40de8016ba553b6fac0845cb55f4ad443a69"},
 ]

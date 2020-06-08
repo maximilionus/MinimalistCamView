@@ -9,6 +9,7 @@ python = "^3.8"
 opencv-python = "^4.2.0"
 pillow = "^7.1.2"
 cx-freeze = "^6.1"
+ttkthemes = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.2"
