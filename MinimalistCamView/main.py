@@ -17,6 +17,8 @@ class MCV_UI(tk.Tk):
         self.__logger = logging.getLogger('MCV_UI')
         self.__ttk_style = ThemedStyle(self)
         self.__ttk_style.set_theme('equilux')
+        self.geometry("400x300")
+        self.minsize(240, 200)
         self.__showUI__cam_view()
         self.__logger.info('User Interface is ready.')
 
@@ -54,7 +56,7 @@ class MCV_UI(tk.Tk):
         self.__frame_bot.columnconfigure(0, weight=1)
         self.__frame_bot.grid(row=1, column=0, sticky="NSEW")
 
-        self.__label_cam = ttk.Label(self.__frame_bot)
+        self.__label_cam = ttk.Label(self.__frame_bot, justify=tk.CENTER)
         self.__label_cam.grid(row=0, column=0, sticky='NSEW')
 
     def __cam_connect(self):
@@ -66,7 +68,11 @@ class MCV_UI(tk.Tk):
         if is_pulled:
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             img = Image.fromarray(cv2image)
-            img = img.resize((self.__label_cam.winfo_width(), self.__label_cam.winfo_height()), Image.ANTIALIAS)
+            img_ratio = min(
+                self.__label_cam.winfo_width() / img.width,
+                self.__label_cam.winfo_height() / img.height
+            )
+            img = img.resize((round(img.width * img_ratio), round(img.height * img_ratio)), Image.ANTIALIAS)
             imgtk = ImageTk.PhotoImage(image=img)
             self.__label_cam.imgtk = imgtk
             self.__label_cam.configure(image=imgtk)
