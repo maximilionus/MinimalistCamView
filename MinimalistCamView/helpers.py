@@ -24,16 +24,20 @@ U_SYMBOLS = {
 
 
 class MCVConfig:
-    __logging = logging.getLogger('MCVConfig')
+    __logger = logging.getLogger('MCVConfig')
 
     @classmethod
-    def create(cls):
+    def initialize(cls):
         if not cls.is_config_exist():
             cls.create_dirs()
-            with open(os.path.join(MCVCFG_PATH, MCVCFG_NAME), 'wt') as configfile:
-                json.dump(MCVCFG_PROTO, configfile, indent=4)
-            cls.__logging.info('Config file was created')
-        else: cls.__logging.info('Config file already exists')
+            cls.write(MCVCFG_PROTO)
+            cls.__logger.info('Config file was created.')
+        else: cls.__logger.info('Config file already exists.')
+
+    @staticmethod
+    def write(config_dict: dict):
+        with open(MCVCFG_PATH_FULL, 'wt') as configfile:
+            json.dump(config_dict, configfile, indent=4)
 
     @classmethod
     def get(cls) -> dict:
@@ -42,7 +46,61 @@ class MCVConfig:
                 cfg = json.load(configfile)
             return cfg
         else:
-            cls.__logging.error("Config file doesn't exist. Can't read values.")
+            cls.__logger.error("Config file doesn't exist. Can't read values.")
+
+    @classmethod
+    def cam_add(cls, name='', address=''):
+        """ Add camera to config.
+
+        Args:
+            name (str, optional): Name for the camera (Will be displayed in GUI). Defaults to ''.
+            address ((str || int), optional): Address for connection. Can be string or integer. Defaults to 0 (Webcam).
+        """
+        cfg_dict = cls.get()
+        cams_dict = cfg_dict["cam_list"]
+        new_index = (max(cams_dict.keys()) + 1) if len(cams_dict.keys()) > 0 else 0
+
+        new_cam_dict = {
+            new_index: {
+                "name": name,
+                "address": address
+            }
+        }
+
+        cams_dict.update(new_cam_dict)
+        cfg_dict.update({"cam_list": cams_dict})
+        cls.write(cfg_dict)
+        cls.__logger.info(f"Successfully add new camera [{new_index}] to config.")
+
+    @classmethod
+    def cam_get(cls):
+        # TODO
+        pass
+
+    @classmethod
+    def cam_remove(cls, camera_index: int) -> bool:
+        """ Remove camera from configuration file.
+
+        Args:
+            camera_index (int): Index of camera for removal.
+
+        Returns:
+            bool:
+                True - camera was removed.
+                False - camera doesn't exist.
+        """
+        cfg_dict = cls.get()
+        if cfg_dict.get("cam_list", None):
+            cams_dict = cfg_dict["cam_list"]
+            if cams_dict.get(camera_index, None):
+                del(cams_dict[camera_index])
+                cfg_dict.update({"cam_list": cams_dict})
+                cls.write(cfg_dict)
+                cls.__logger.info(f"Camera with index {camera_index} has been removed.")
+                return True
+            else:
+                cls.__logger.info("Can't remove unexisting camera.")
+                return False
 
     @staticmethod
     def create_dirs() -> bool:

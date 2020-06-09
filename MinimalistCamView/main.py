@@ -17,7 +17,7 @@ class MCV_UI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.__logger = logging.getLogger('MCV_UI')
-        h.MCVConfig.create()
+        h.MCVConfig.initialize()
         self.iconbitmap(h.ICON_APP)
         self.geometry("400x300")
         self.minsize(240, 200)
