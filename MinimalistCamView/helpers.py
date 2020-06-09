@@ -49,16 +49,17 @@ class MCVConfig:
             cls.__logger.error("Config file doesn't exist. Can't read values.")
 
     @classmethod
-    def cam_add(cls, name='', address=''):
+    def cam_add(cls, name='', address=0):
         """ Add camera to config.
 
         Args:
-            name (str, optional): Name for the camera (Will be displayed in GUI). Defaults to ''.
+            name (str, optional): Name for the camera (Will be displayed in GUI). Defaults to "".
             address ((str || int), optional): Address for connection. Can be string or integer. Defaults to 0 (Webcam).
         """
         cfg_dict = cls.get()
         cams_dict = cfg_dict["cam_list"]
-        new_index = (max(cams_dict.keys()) + 1) if len(cams_dict.keys()) > 0 else 0
+        cams_indexes = [int(i) for i in cams_dict.keys()]
+        new_index = str((max(cams_indexes) + 1)) if len(cams_dict.keys()) > 0 else "0"
 
         new_cam_dict = {
             new_index: {
@@ -73,9 +74,26 @@ class MCVConfig:
         cls.__logger.info(f"Successfully add new camera [{new_index}] to config.")
 
     @classmethod
-    def cam_get(cls):
-        # TODO
-        pass
+    def cam_get(cls, camera_index) -> dict:
+        """ Get camera dictionary by it's index.
+
+        Args:
+            camera_index ([type]): Index of existing camera in "cam_list"
+
+        Returns:
+            dict: Dictionary with camera information keys.
+            None: if camera with this index doesn't exist.
+        """
+        cfg_dict = cls.get()
+        cams_selected = cfg_dict["cams_list"].get(camera_index, None)
+        if cams_selected:
+            return cams_selected
+
+    @classmethod
+    def cam_use(cls, camera_index: int):
+        cfg_dict = cls.get()
+        cfg_dict.update({"cam_selected": camera_index})
+        cls.write(cfg_dict)
 
     @classmethod
     def cam_remove(cls, camera_index: int) -> bool:
@@ -89,6 +107,7 @@ class MCVConfig:
                 True - camera was removed.
                 False - camera doesn't exist.
         """
+        camera_index = str(camera_index)
         cfg_dict = cls.get()
         if cfg_dict.get("cam_list", None):
             cams_dict = cfg_dict["cam_list"]
