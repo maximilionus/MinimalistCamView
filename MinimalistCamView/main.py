@@ -1,32 +1,32 @@
 import logging
 import tkinter as tk
-from tkinter import ttk
 from threading import Thread
 
 from cv2 import cv2
 from PIL import Image, ImageTk
-from ttkthemes import ThemedStyle
 
 from MinimalistCamView import helpers as h
 from MinimalistCamView import temp_config
 
 
 class MCV_UI(tk.Tk):
+    HEXC_BG = "#262626"
+    HEXC_BG_BRIGHTER = "#303030"
+    HEXC_FG = "#afafaf"
+
     def __init__(self):
         super().__init__()
         self.__logger = logging.getLogger('MCV_UI')
         h.MCVConfig.create()
         self.iconbitmap(h.ICON_APP)
-        self.__ttk_style = ThemedStyle(self)
-        self.__ttk_style.set_theme('black')
         self.geometry("400x300")
         self.minsize(240, 200)
-        self.__showUI__cam_view()
+        self.showUI__cam_view()
         self.__logger.info('User Interface is ready.')
 
         self.__pull_frame_loop_enabled = False
 
-    def __showUI__cam_view(self):
+    def showUI__cam_view(self):
         self.title(h.TITLE_STR)
 
         # Top
@@ -44,25 +44,25 @@ class MCV_UI(tk.Tk):
                 self.__logger.info('End frame pulling.')
 
         self.columnconfigure(0, weight=1)
-        self.__frame_top = ttk.Frame(self)
-        self.__button_play_switch = ttk.Button(self.__frame_top, text=h.U_SYMBOLS['play'], width=20, command=cam_playswitch)
+        self.__frame_top = tk.Frame(self, bg=self.HEXC_BG_BRIGHTER)
+        self.__button_play_switch = tk.Button(self.__frame_top, text=h.U_SYMBOLS['play'], width=20, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=cam_playswitch)
         self.__button_play_switch.grid(row=0, column=0, sticky="W")
-        self.__button_record = ttk.Button(self.__frame_top, text=h.U_SYMBOLS["record"], width=10, command=self.__recordSwitch)
+        self.__button_record = tk.Button(self.__frame_top, text=h.U_SYMBOLS["record"], width=10, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=self.__recordSwitch)
         self.__button_record.grid(row=0, column=1, sticky="W")
-        self.__button_cams = ttk.Button(self.__frame_top, text=h.U_SYMBOLS['vertical_dots'], command=self.showUI__cam_list, width=10)
+        self.__button_cams = tk.Button(self.__frame_top, text=h.U_SYMBOLS['vertical_dots'], bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=self.showUI__cam_list, width=10)
         self.__button_cams.grid(row=0, column=2, sticky="W")
         self.__frame_top.grid(row=0, column=0, sticky="WE")
 
         # Bottom
         self.rowconfigure(1, weight=1)
-        self.__frame_bot = ttk.Frame(self)
+        self.__frame_bot = tk.Frame(self, bg=self.HEXC_BG)
         self.__frame_bot.rowconfigure(0, weight=1)
         self.__frame_bot.columnconfigure(0, weight=1)
         self.__frame_bot.grid(row=1, column=0, sticky="NSEW")
 
-        self.__label_cam = ttk.Label(self.__frame_bot, justify=tk.CENTER)
+        self.__label_cam = tk.Label(self.__frame_bot, bg=self.HEXC_BG, justify=tk.CENTER)
         self.__label_cam.grid(row=0, column=0, sticky='NSEW')
-        self.__lcam_text_status = tk.Label(self.__label_cam, text="", fg="#afafaf", bg="#303030", font="40")
+        self.__lcam_text_status = tk.Label(self.__label_cam, text="", fg=self.HEXC_FG, bg=self.HEXC_BG_BRIGHTER, font="40")
         self.set_lcam_banner(1)
         self.__label_cam.rowconfigure(0, weight=1)
         self.__label_cam.columnconfigure(0, weight=1)
@@ -140,27 +140,27 @@ class MCV_UI(tk.Tk):
         root.protocol("WM_DELETE_WINDOW", on_close)
 
         # Left Frame
-        frame_left = ttk.Frame(root)
+        frame_left = tk.Frame(root, bg=self.HEXC_BG)
         frame_left.grid(row=0, column=0, sticky="NSEW")
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
 
         lb_cams = tk.Listbox(frame_left, bg="#303030", fg="#bfbfbf", selectmode=tk.SINGLE)
         lb_cams.grid(row=0, column=0, sticky="NSEW")
-        lb_cams_scroll = ttk.Scrollbar(frame_left, command=lb_cams.yview)
+        lb_cams_scroll = tk.Scrollbar(frame_left, command=lb_cams.yview)
         lb_cams.config(yscrollcommand=lb_cams_scroll.set)
         lb_cams_scroll.grid(row=0, column=1, sticky="NS")
         frame_left.rowconfigure(0, weight=1)
         frame_left.columnconfigure(0, weight=1)
 
         # Right Frame
-        frame_right = ttk.Frame(root)
+        frame_right = tk.Frame(root, bg=self.HEXC_BG)
         frame_right.grid(row=0, column=1, sticky="NSEW")
         root.columnconfigure(1, weight=1)
 
-        button_use = ttk.Button(frame_right, text="Use")
-        button_edit = ttk.Button(frame_right, text="Edit")
-        button_add = ttk.Button(frame_right, text="Add")
+        button_use = tk.Button(frame_right, text="Use", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT)
+        button_edit = tk.Button(frame_right, text="Edit", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT)
+        button_add = tk.Button(frame_right, text="Add", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT)
         button_use.grid(row=0, column=0, sticky="NEW")
         button_edit.grid(row=1, column=0, sticky="NEW")
         button_add.grid(row=2, column=0, sticky="NEW")
