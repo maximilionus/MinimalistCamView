@@ -1,10 +1,11 @@
-from cv2 import cv2
+import logging
 import tkinter as tk
 from tkinter import ttk
-from ttkthemes import ThemedStyle
-from PIL import Image, ImageTk
 from threading import Thread
-import logging
+
+from cv2 import cv2
+from PIL import Image, ImageTk
+from ttkthemes import ThemedStyle
 
 from MinimalistCamView import helpers as h
 from MinimalistCamView import temp_config
@@ -35,7 +36,7 @@ class MCV_UI(tk.Tk):
                 self.__button_play_switch.config(text=h.U_SYMBOLS['stop'])
                 self.__logger.info('Begin frame pulling.')
                 self.__cam_connect()
-                self.__pull_frame_loop()
+                self.pull_frame_loop()
             else:
                 self.__pull_frame_loop_enabled = False
                 self.__button_play_switch.config(text=h.U_SYMBOLS['play'])
@@ -46,9 +47,11 @@ class MCV_UI(tk.Tk):
         self.__frame_top = ttk.Frame(self)
         self.__button_play_switch = ttk.Button(self.__frame_top, text=h.U_SYMBOLS['play'], width=20, command=cam_playswitch)
         self.__button_play_switch.grid(row=0, column=0, sticky="W")
-        self.__button_cams = ttk.Button(self.__frame_top, text=h.U_SYMBOLS['vertical_dots'], command=self.__showUI__cam_list, width=10)
+        self.__button_record = ttk.Button(self.__frame_top, text=h.U_SYMBOLS["record"], width=10, command=self.__recordSwitch)
+        self.__button_record.grid(row=0, column=1, sticky="W")
+        self.__button_cams = ttk.Button(self.__frame_top, text=h.U_SYMBOLS['vertical_dots'], command=self.showUI__cam_list, width=10)
         self.__button_cams.grid(row=0, column=2, sticky="W")
-        self.__frame_top.grid(row=0, column=0, sticky="NWE")
+        self.__frame_top.grid(row=0, column=0, sticky="WE")
 
         # Bottom
         self.rowconfigure(1, weight=1)
@@ -60,15 +63,22 @@ class MCV_UI(tk.Tk):
         self.__label_cam = ttk.Label(self.__frame_bot, justify=tk.CENTER)
         self.__label_cam.grid(row=0, column=0, sticky='NSEW')
         self.__lcam_text_status = tk.Label(self.__label_cam, text="", fg="#afafaf", bg="#303030", font="40")
-        self.__set_lcam_status(1)
+        self.set_lcam_banner(1)
         self.__label_cam.rowconfigure(0, weight=1)
         self.__label_cam.columnconfigure(0, weight=1)
+
+    def __recordSwitch(self):
+        if not hasattr(self, "__recorder"):
+            self.__recorder = h.MCVVideoRecord(self.__cam_capture)
+            self.__recorder.record()
+        else:
+            self.__recorder.stop()
 
     def __cam_connect(self):
         self.__cam_capture = cv2.VideoCapture(temp_config.CONNECTION)  # TODO: Read from config
         self.__logger.info("Successfully connected to cam.")
 
-    def __set_lcam_status(self, status: int):
+    def set_lcam_banner(self, status: int):
         """ Set status line
 
         Args:
@@ -82,14 +92,15 @@ class MCV_UI(tk.Tk):
         else:
             if status == 1:
                 self.__lcam_text_status.config(text='NOT CONNECTED')
+                self.__lcam_text_status.grid(row=0, column=0, sticky="EW")
             elif status == 2:
                 self.__lcam_text_status.config(text='DISCONNECTED')
-            self.__lcam_text_status.grid(row=0, column=0, sticky="EW")
+                self.__lcam_text_status.grid(row=0, column=0, sticky="EW")
 
-    def __pull_frame_loop(self):
+    def pull_frame_loop(self):
         is_pulled, frame = self.__cam_capture.read()
         if is_pulled:
-            self.__set_lcam_status(0)
+            self.set_lcam_banner(0)
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             img = Image.fromarray(cv2image)
             img_ratio = min(
@@ -102,13 +113,13 @@ class MCV_UI(tk.Tk):
             self.__label_cam.config(image=imgtk)
 
         if self.__pull_frame_loop_enabled:
-            self.__label_cam.after(10, self.__pull_frame_loop)
+            self.__label_cam.after(10, self.pull_frame_loop)
         else:
-            self.__set_lcam_status(2)
+            self.set_lcam_banner(2)
             del(self.__label_cam.imgtk)
             self.__label_cam.config(image=None)
 
-    def __showUI__cam_list(self):
+    def showUI__cam_list(self):
         def update_cam_list():
             def ucl_thread():
                 cams = h.MCVConfig.get()["cam_list"].keys()
