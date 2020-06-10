@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from cv2 import cv2
-from threading import Thread
+import multiprocessing as mp
 
 
 # CONST
@@ -74,20 +74,19 @@ class MCVConfig:
         cls.__logger.info(f"Successfully add new camera [{new_index}] to config.")
 
     @classmethod
-    def cam_get(cls, camera_index) -> dict:
+    def cam_get(cls, camera_index: int) -> dict:
         """ Get camera dictionary by it's index.
 
         Args:
-            camera_index ([type]): Index of existing camera in "cam_list"
+            camera_index (int): Index of existing camera in "cam_list"
 
         Returns:
             dict: Dictionary with camera information keys.
             None: if camera with this index doesn't exist.
         """
         cfg_dict = cls.get()
-        cams_selected = cfg_dict["cams_list"].get(camera_index, None)
-        if cams_selected:
-            return cams_selected
+        cam_selected = cfg_dict["cam_list"].get(str(camera_index), None)
+        return cam_selected
 
     @classmethod
     def cam_use(cls, camera_index: int):
@@ -134,43 +133,46 @@ class MCVConfig:
 class MCVVideoRecord:
     __logger = logging.getLogger("MCV_VideoRecord")
 
-    def __init__(self, stream: object):
-        self.is_recording = False
-        self.__stream = stream
+    def __init__(self):
+        self.is_recording = mp.Value('i', 0)
         self.__logger.info("Object is ready.")
 
     def record(self):
-        def record_thread():
-            self.__init_writer()
-            while self.is_recording:
-                frame = self.__pull_frame()
-                self.__writer.write(frame)
-                # sleep(0.01)
-            self.__writer.release()
-            self.__logger.debug("Writer released. End of record.")
-            return 0
+        self.is_recording.value = 1
+        mp.Process(target=self.record_process, args=(self.is_recording,)).start()
+        self.__logger.info("Begin record in detached process.")
 
-        self.is_recording = True
-        Thread(target=record_thread).start()
-        self.__logger.info("Begin record.")
+    @classmethod
+    def record_process(cls, is_recording: mp.Value):
+        def __pull_frame() -> object:
+            is_pulled, frame = stream.read()
+            return frame if is_pulled else __pull_frame()
+
+        def __get_frame_size() -> tuple:
+            w = int(stream.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h = int(stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            return (w, h)
+
+        # Initialize Connection
+        selected_cam = str(MCVConfig.get()['cam_selected'])
+        cam_address = MCVConfig.cam_get(selected_cam)["address"]
+        stream = cv2.VideoCapture(cam_address)
+        if not stream.isOpened(): return 1
+
+        # Initialize Writer
+        w, h = __get_frame_size()
+        fourcc = cv2.VideoWriter_fourcc(*"MJPG")
+        writer = cv2.VideoWriter('output.avi', fourcc, 25, (w, h))
+        cls.__logger.debug("Writer initialized.")
+
+        while is_recording.value == 1:
+            frame = __pull_frame()
+            writer.write(frame)
+
+        writer.release()
+        cls.__logger.debug("Writer released. End of record.")
+        return 0
 
     def stop(self):
-        self.is_recording = False
+        self.is_recording.value = 0
         self.__logger.info("Recording was stopped. Result saved to file.")
-
-    def __init_writer(self):
-        w, h = self.__get_frame_size()
-
-        fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-        self.__writer = cv2.VideoWriter('output.avi', fourcc, 25, (w, h))
-        self.__logger.debug("Writer initialized.")
-
-    def __pull_frame(self) -> object:
-        is_pulled, frame = self.__stream.read()
-        return frame if is_pulled else self.__pull_frame()
-
-    def __get_frame_size(self) -> tuple:
-        w = int(self.__stream.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = int(self.__stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        return (w, h)

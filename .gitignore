@@ -13,3 +13,6 @@ __pycache__
 
 # Ignore temp config
 MinimalistCamView/temp_config.py
+
+# Ignore recorded files
+*.avi

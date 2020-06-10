@@ -34,19 +34,26 @@ class MCV_UI(tk.Tk):
                 self.__pull_frame_loop_enabled = True
                 self.__button_play_switch.config(text=h.U_SYMBOLS['stop'])
                 self.__logger.info('Begin frame pulling.')
-                self.__cam_connect()
-                self.pull_frame_loop()
+                if self.cam_connect(): self.pull_frame_loop()
             else:
                 self.__pull_frame_loop_enabled = False
                 self.__button_play_switch.config(text=h.U_SYMBOLS['play'])
                 self.__cam_capture.release()
                 self.__logger.info('End frame pulling.')
 
+        def cam_recordswitch():
+            if not hasattr(self, "recorder"):
+                self.recorder = h.MCVVideoRecord()
+                self.recorder.record()
+            else:
+                self.recorder.stop()
+                del(self.recorder)
+
         self.columnconfigure(0, weight=1)
         self.__frame_top = tk.Frame(self, bg=self.HEXC_BG_BRIGHTER)
         self.__button_play_switch = tk.Button(self.__frame_top, text=h.U_SYMBOLS['play'], width=20, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=cam_playswitch)
         self.__button_play_switch.grid(row=0, column=0, sticky="W")
-        self.__button_record = tk.Button(self.__frame_top, text=h.U_SYMBOLS["record"], width=10, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=self.__recordSwitch)
+        self.__button_record = tk.Button(self.__frame_top, text=h.U_SYMBOLS["record"], width=10, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=cam_recordswitch)
         self.__button_record.grid(row=0, column=1, sticky="W")
         self.__button_cams = tk.Button(self.__frame_top, text=h.U_SYMBOLS['vertical_dots'], bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=self.createui__cam_list, width=10)
         self.__button_cams.grid(row=0, column=2, sticky="W")
@@ -66,24 +73,19 @@ class MCV_UI(tk.Tk):
         self.__label_cam.rowconfigure(0, weight=1)
         self.__label_cam.columnconfigure(0, weight=1)
 
-    def __recordSwitch(self):
-        if not hasattr(self, "__recorder"):
-            self.__recorder = h.MCVVideoRecord(self.__cam_capture)
-            self.__recorder.record()
-        else:
-            self.__recorder.stop()
-
-    def __cam_connect(self):
+    def cam_connect(self):
         cfg_dict = h.MCVConfig.get()
         selected_cam = cfg_dict.get("cam_selected", 0)
-        address = cfg_dict["cam_list"][str(selected_cam)].get("address", 0)
+        address = h.MCVConfig.cam_get(selected_cam).get("address", 0)
 
         self.__cam_capture = cv2.VideoCapture(address)
         if self.__cam_capture.isOpened():
             self.__logger.info("Successfully connected to cam.")
+            return True
         else:
             self.set_lcam_banner(3)
             self.__logger.error("Can't connect to cam")
+            return False
 
     def set_lcam_banner(self, status: int):
         """ Set status line
@@ -147,6 +149,7 @@ class MCV_UI(tk.Tk):
 
         root = tk.Toplevel(self)
         root.geometry('300x500')
+        root.minsize(210, 96)
         root.title('Cams')
         root.iconbitmap(h.ICON_APP)
         root.protocol("WM_DELETE_WINDOW", on_close)
@@ -159,12 +162,12 @@ class MCV_UI(tk.Tk):
             else:
                 return 0
 
-        frame_left = tk.Frame(root, bg=self.HEXC_BG)
+        frame_left = tk.Frame(root, bg=self.HEXC_BG, padx=10, pady=10)
         frame_left.grid(row=0, column=0, sticky="NSEW")
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
 
-        lb_cams = tk.Listbox(frame_left, bg="#303030", fg="#bfbfbf", selectmode=tk.SINGLE)
+        lb_cams = tk.Listbox(frame_left, bg="#303030", fg="#bfbfbf", selectmode=tk.SINGLE, selectbackground=self.HEXC_BG)
         lb_cams.grid(row=0, column=0, sticky="NSEW")
         lb_cams_scroll = tk.Scrollbar(frame_left, command=lb_cams.yview)
         lb_cams.config(yscrollcommand=lb_cams_scroll.set)
@@ -179,7 +182,7 @@ class MCV_UI(tk.Tk):
             cfg_dict["cam_selected"] = selected_cam
             h.MCVConfig.write(cfg_dict)
 
-        frame_right = tk.Frame(root, bg=self.HEXC_BG)
+        frame_right = tk.Frame(root, bg=self.HEXC_BG, padx=10, pady=10)
         frame_right.grid(row=0, column=1, sticky="NSEW")
         root.columnconfigure(1, weight=1)
 
