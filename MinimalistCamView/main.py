@@ -11,7 +11,7 @@ from MinimalistCamView import helpers as h
 class MCV_UI(tk.Tk):
     HEXC_BG = "#262626"
     HEXC_BG_BRIGHTER = "#303030"
-    HEXC_FG = "#afafaf"
+    HEXC_FG = "#cfcfcf"
 
     def __init__(self):
         super().__init__()
@@ -161,6 +161,7 @@ class MCV_UI(tk.Tk):
         root.minsize(210, 96)
         root.title('Cams')
         root.iconbitmap(h.ICON_APP)
+        root.focus_force()
         root.protocol("WM_DELETE_WINDOW", on_close)
 
         # Left Frame
@@ -196,14 +197,58 @@ class MCV_UI(tk.Tk):
         root.columnconfigure(1, weight=1)
 
         button_use = tk.Button(frame_right, text="Use", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=useCam)
-        button_edit = tk.Button(frame_right, text="Edit", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT)
-        button_add = tk.Button(frame_right, text="Add", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT)
+        button_edit = tk.Button(frame_right, text="Edit", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=lambda: self.createui__cam_edit(get_camlbox_selected()))
+        button_add = tk.Button(frame_right, text="Add", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=self.createui__cam_edit)
         button_use.grid(row=0, column=0, sticky="NEW")
         button_edit.grid(row=1, column=0, sticky="NEW")
         button_add.grid(row=2, column=0, sticky="NEW")
         frame_right.columnconfigure(0, weight=1)
 
         update_cam_list()
+
+    def createui__cam_edit(self, cam_index: int = None):
+        """ Create top level gui for editing or adding camera.
+
+        Args:
+            cam_index (int, optional): Camera index if you want to edit existing camera.
+            If None - will use camera addition procedure.
+            Defaults to None.
+        """
+        str_title = "Create Camera" if not cam_index else "Edit Camera"
+        str_button_confirm = "Create" if not cam_index else "Confirm"
+
+        root = tk.Toplevel(self, bg=self.HEXC_BG)
+        root.iconbitmap(h.ICON_APP)
+        root.geometry('300x100')
+        root.minsize(187, 80)
+        root.title(str_title)
+        root.focus_force()
+
+        # Top Frame
+        frame_top = tk.Frame(root, bg=self.HEXC_BG)
+        frame_top.grid(row=0, column=0, sticky="NSEW", padx=4, pady=4)
+        root.columnconfigure(0, weight=1)
+
+        cam_name_label = tk.Label(frame_top, text="Name", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG)
+        cam_name_entry = tk.Entry(frame_top, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG)
+        cam_name_label.grid(row=0, column=0, sticky="EW")
+        cam_name_entry.grid(row=0, column=1, sticky="EW", padx=3)
+
+        cam_address_label = tk.Label(frame_top, text="Address", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG)
+        cam_address_entry = tk.Entry(frame_top, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG)
+        cam_address_label.grid(row=1, column=0, sticky="EW")
+        cam_address_entry.grid(row=1, column=1, sticky="EW", padx=3)
+
+        frame_top.columnconfigure(0, weight=1)
+        frame_top.columnconfigure(1, weight=1)
+
+        # Bottom Frame
+        frame_bot = tk.Frame(root, bg=self.HEXC_BG)
+        frame_bot.grid(row=1, column=0, sticky="SEW")
+
+        button_confirm = tk.Button(frame_bot, text=str_button_confirm, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT)
+        button_confirm.grid(row=0, column=0, sticky="EW", padx=40)
+        frame_bot.columnconfigure(0, weight=1)
 
 
 if __name__ == "__main__":
