@@ -76,24 +76,9 @@ class MCVConfig:
         cls.__logger.info(f"Successfully add new camera [{new_index}] to config.")
 
     @classmethod
-    def cam_get(cls, camera_index: int) -> dict:
-        """ Get camera dictionary by it's index.
-
-        Args:
-            camera_index (int): Index of existing camera in "cam_list"
-
-        Returns:
-            dict: Dictionary with camera information keys.
-            None: if camera with this index doesn't exist.
-        """
+    def cam_update(cls, camera_index: int, name: str, address: str):
         cfg_dict = cls.get()
-        cam_selected = cfg_dict["cam_list"].get(str(camera_index), None)
-        return cam_selected
-
-    @classmethod
-    def cam_use(cls, camera_index: int):
-        cfg_dict = cls.get()
-        cfg_dict.update({"cam_selected": camera_index})
+        cfg_dict["cam_list"].get(str(camera_index), 0).update({"name": name, "address": address})
         cls.write(cfg_dict)
 
     @classmethod
@@ -121,6 +106,27 @@ class MCVConfig:
             else:
                 cls.__logger.info("Can't remove unexisting camera.")
                 return False
+
+    @classmethod
+    def cam_get(cls, camera_index: int) -> dict:
+        """ Get camera dictionary by it's index.
+
+        Args:
+            camera_index (int): Index of existing camera in "cam_list"
+
+        Returns:
+            dict: Dictionary with camera information keys.
+            None: if camera with this index doesn't exist.
+        """
+        cfg_dict = cls.get()
+        cam_selected = cfg_dict["cam_list"].get(str(camera_index), None)
+        return cam_selected
+
+    @classmethod
+    def cam_use(cls, camera_index: int):
+        cfg_dict = cls.get()
+        cfg_dict.update({"cam_selected": camera_index})
+        cls.write(cfg_dict)
 
     @staticmethod
     def create_dirs() -> bool:

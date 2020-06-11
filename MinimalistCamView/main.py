@@ -94,6 +94,7 @@ class MCV_UI(tk.Tk):
         else:
             self.set_lcam_banner(3)
             self.__logger.error("Can't connect to cam")
+            self.__button_play_switch.config(text=h.U_SYMBOLS["play"])
             return False
 
     def set_lcam_banner(self, status: int):
@@ -144,6 +145,7 @@ class MCV_UI(tk.Tk):
     def createui__cam_list(self):
         def update_cam_list():
             def ucl_thread():
+                lb_cams.delete(0, tk.END)
                 cams_cfg = h.MCVConfig.get()["cam_list"]
                 cams_list = cams_cfg.keys()
                 for cam in cams_list:
@@ -165,7 +167,7 @@ class MCV_UI(tk.Tk):
         root.protocol("WM_DELETE_WINDOW", on_close)
 
         # Left Frame
-        def get_camlbox_selected():
+        def get_camlbox_selected() -> int:
             selection = lb_cams.curselection()
             if len(selection) > 0:
                 return selection[0]
@@ -192,21 +194,28 @@ class MCV_UI(tk.Tk):
             cfg_dict["cam_selected"] = selected_cam
             h.MCVConfig.write(cfg_dict)
 
+        def remove_cam():
+            selected_cam = get_camlbox_selected()
+            h.MCVConfig.cam_remove(selected_cam)
+            update_cam_list()
+
         frame_right = tk.Frame(root, bg=self.HEXC_BG, padx=10, pady=10)
         frame_right.grid(row=0, column=1, sticky="NSEW")
         root.columnconfigure(1, weight=1)
 
         button_use = tk.Button(frame_right, text="Use", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=useCam)
-        button_edit = tk.Button(frame_right, text="Edit", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=lambda: self.createui__cam_edit(get_camlbox_selected()))
-        button_add = tk.Button(frame_right, text="Add", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=self.createui__cam_edit)
+        button_edit = tk.Button(frame_right, text="Edit", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=lambda: self.createui__cam_edit(get_camlbox_selected(), update_cam_list))
+        button_add = tk.Button(frame_right, text="Add", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=lambda: self.createui__cam_edit(update_cam_list_fnc=update_cam_list))
+        button_remove = tk.Button(frame_right, text="Remove", bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=remove_cam)
         button_use.grid(row=0, column=0, sticky="NEW")
         button_edit.grid(row=1, column=0, sticky="NEW")
         button_add.grid(row=2, column=0, sticky="NEW")
+        button_remove.grid(row=3, column=0, sticky="NEW")
         frame_right.columnconfigure(0, weight=1)
 
         update_cam_list()
 
-    def createui__cam_edit(self, cam_index: int = None):
+    def createui__cam_edit(self, cam_index: int = None, update_cam_list_fnc=None):
         """ Create top level gui for editing or adding camera.
 
         Args:
@@ -214,7 +223,21 @@ class MCV_UI(tk.Tk):
             If None - will use camera addition procedure.
             Defaults to None.
         """
-        str_title = "Create Camera" if not cam_index else "Edit Camera"
+        def apply_changes():
+            name_get = cam_name_entry.get()
+            address_get = cam_address_entry.get()
+
+            if len(name_get.replace(' ', '')) > 0 and len(address_get.replace(' ', '')) > 0:
+                if cam_index: h.MCVConfig.cam_update(cam_index, name_get, address_get)
+                else: h.MCVConfig.cam_add(name_get, address_get)
+                if update_cam_list_fnc: update_cam_list_fnc()
+                self.__logger.info("Сamera configuration was successfully " + ("updated" if cam_index else "created") + ".")
+
+                root.destroy()
+            elif len(name_get.replace(' ', '')) == 0: cam_name_entry.delete(0, tk.END); cam_name_entry.insert(tk.END, "Can't be empty.")
+            elif len(address_get.replace(' ', '')) == 0: cam_address_entry.delete(0, tk.END); cam_address_entry.insert(tk.END, "Can't be empty.")
+
+        str_title = "Create Camera" if not cam_index else f"Edit Camera [{cam_index}]"
         str_button_confirm = "Create" if not cam_index else "Confirm"
 
         root = tk.Toplevel(self, bg=self.HEXC_BG)
@@ -246,9 +269,15 @@ class MCV_UI(tk.Tk):
         frame_bot = tk.Frame(root, bg=self.HEXC_BG)
         frame_bot.grid(row=1, column=0, sticky="SEW")
 
-        button_confirm = tk.Button(frame_bot, text=str_button_confirm, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT)
+        button_confirm = tk.Button(frame_bot, text=str_button_confirm, bg=self.HEXC_BG_BRIGHTER, fg=self.HEXC_FG, relief=tk.FLAT, command=apply_changes)
         button_confirm.grid(row=0, column=0, sticky="EW", padx=40)
         frame_bot.columnconfigure(0, weight=1)
+
+        # Actions
+        if cam_index:
+            cam_cfg = h.MCVConfig.cam_get(cam_index)
+            cam_name_entry.insert(tk.END, cam_cfg.get("name", "No Name"))
+            cam_address_entry.insert(tk.END, cam_cfg.get("address", "No Address"))
 
 
 if __name__ == "__main__":
