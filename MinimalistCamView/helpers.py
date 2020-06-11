@@ -3,11 +3,13 @@ import json
 import logging
 from cv2 import cv2
 import multiprocessing as mp
+from time import strftime
 
 
 # CONST
 TITLE_STR = "Minimalist Cam View"
 ICON_APP = "./data/icons/mcv_icon.ico"
+RECORD_FOLDER = "./Recordings"
 MCVCFG_PATH = "./data/config"
 MCVCFG_NAME = "config.json"
 MCVCFG_PATH_FULL = os.path.join(MCVCFG_PATH, MCVCFG_NAME)
@@ -138,9 +140,17 @@ class MCVVideoRecord:
         self.__logger.info("Object is ready.")
 
     def record(self):
+        if not os.path.exists(RECORD_FOLDER):
+            os.makedirs(RECORD_FOLDER)
+            self.__logger.info("Create folder for recordings")
+
         self.is_recording.value = 1
-        mp.Process(target=self.record_process, args=(self.is_recording,)).start()
+        mp.Process(target=self.record_process, args=(self.is_recording,), name="MCV Stream Recorder").start()
         self.__logger.info("Begin record in detached process.")
+
+    def stop(self):
+        self.is_recording.value = 0
+        self.__logger.info("Recording was stopped. Result saved to file.")
 
     @classmethod
     def record_process(cls, is_recording: mp.Value):
@@ -160,11 +170,13 @@ class MCVVideoRecord:
         if not stream.isOpened(): return 1
 
         # Initialize Writer
+        record_name = f'{RECORD_FOLDER}/{strftime("%Y-%m-%d__%H-%M-%S")}.avi'
         w, h = __get_frame_size()
-        fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-        writer = cv2.VideoWriter('output.avi', fourcc, 25, (w, h))
+        fourcc = cv2.VideoWriter_fourcc(*"DIVX")
+        writer = cv2.VideoWriter(record_name, fourcc, 25, (w, h))
         cls.__logger.debug("Writer initialized.")
 
+        # Write frames to file
         while is_recording.value == 1:
             frame = __pull_frame()
             writer.write(frame)
@@ -172,7 +184,3 @@ class MCVVideoRecord:
         writer.release()
         cls.__logger.debug("Writer released. End of record.")
         return 0
-
-    def stop(self):
-        self.is_recording.value = 0
-        self.__logger.info("Recording was stopped. Result saved to file.")

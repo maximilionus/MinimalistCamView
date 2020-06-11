@@ -28,6 +28,13 @@ class MCV_UI(tk.Tk):
     def createui__cam_view(self):
         self.title(h.TITLE_STR)
 
+        def on_close():
+            if hasattr(self, "mcv_recorder"):
+                self.mcv_recorder.stop()
+            self.__logger.info("Closing the app.")
+            self.destroy()
+        self.protocol("WM_DELETE_WINDOW", on_close)
+
         # Top
         def cam_playswitch():
             if not self.__pull_frame_loop_enabled:
@@ -42,12 +49,14 @@ class MCV_UI(tk.Tk):
                 self.__logger.info('End frame pulling.')
 
         def cam_recordswitch():
-            if not hasattr(self, "recorder"):
-                self.recorder = h.MCVVideoRecord()
-                self.recorder.record()
+            if not hasattr(self, "mcv_recorder"):
+                self.mcv_recorder = h.MCVVideoRecord()
+                self.mcv_recorder.record()
+                self.__button_record.config(text=h.U_SYMBOLS['stop'])
             else:
-                self.recorder.stop()
-                del(self.recorder)
+                self.mcv_recorder.stop()
+                self.__button_record.config(text=h.U_SYMBOLS['record'])
+                del(self.mcv_recorder)
 
         self.columnconfigure(0, weight=1)
         self.__frame_top = tk.Frame(self, bg=self.HEXC_BG_BRIGHTER)
