@@ -1,6 +1,7 @@
 import logging
 import tkinter as tk
 from threading import Thread
+from time import strftime
 
 from cv2 import cv2
 from PIL import Image, ImageTk
@@ -281,6 +282,6 @@ class MCV_UI(tk.Tk):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='MCV.log', filemode='w', level=logging.NOTSET, format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s")
+    logging.basicConfig(filename=f'MCV-{strftime("%Y-%m-%d__%H-%M-%S")}.log', filemode='w', level=logging.NOTSET, format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s")
     ui = MCV_UI()
     ui.mainloop()
