@@ -3,3 +3,9 @@
 
 ## Main Information
 **Minimalist Cam View** is a python application with gui support for viewing and recording any camera stream.
+
+## Arguments
+### `main.py`
+| Arg               | Description                                              |
+| :---------------- | :------------------------------------------------------- |
+| `--no-gui-record` | Run MCV in non-gui mode and start the recording from cam |
