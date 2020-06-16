@@ -1,4 +1,4 @@
-![](./MinimalistCamView/data/icons/mcv_icon.ico)
+![](./MinimalistCamView/data/icons/mcv_icon.png)
 # Minimalist Cam View
 
 ## Main Information
@@ -8,5 +8,6 @@
 ### `main.py`
 | Arg             | Description                                              |
 | :-------------- | :------------------------------------------------------- |
-| `--quiet`       | Disable logging to file                                  |
 | `--only-record` | Run MCV in non-gui mode and start the recording from cam |
+| `--quiet`       | Disable logging to file                                  |
+| `--verbose-log` | Log everything with level of logging set to `NOTSET`     |

@@ -8,7 +8,8 @@ if __name__ == "__main__":
     if "--quiet" not in argv:
         try: mkdir("./Logs")
         except FileExistsError: pass
-        logging.basicConfig(filename=f'./Logs/MCV-{strftime("%Y-%m-%d__%H-%M-%S")}.log', filemode='w', level=logging.NOTSET, format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s")
+        loglevel = logging.NOTSET if "--verbose-log" in argv else logging.INFO
+        logging.basicConfig(filename=f'./Logs/MCV-{strftime("%Y-%m-%d__%H-%M-%S")}.log', filemode='w', level=loglevel, format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s")
     logger = logging.getLogger("MCV.Boot")
 
     if '--only-record' in argv:
