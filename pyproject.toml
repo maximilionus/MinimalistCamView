@@ -3,6 +3,9 @@ name = "MinimalistCamView"
 version = "0.0.1"
 description = ""
 authors = ["maximilionus <xxxarakxxx@gmail.com>"]
+packages = [
+    { include = "./MinimalistCamView" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
