@@ -6,6 +6,7 @@
 
 ## Arguments
 ### `main.py`
-| Arg               | Description                                              |
-| :---------------- | :------------------------------------------------------- |
-| `--no-gui-record` | Run MCV in non-gui mode and start the recording from cam |
+| Arg             | Description                                              |
+| :-------------- | :------------------------------------------------------- |
+| `--quiet`       | Disable logging to file                                  |
+| `--only-record` | Run MCV in non-gui mode and start the recording from cam |

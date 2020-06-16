@@ -7,12 +7,12 @@ from time import strftime
 
 
 # CONST
+ICON_APP = os.path.abspath("./data/icons/mcv_icon.png")
 TITLE_STR = "Minimalist Cam View"
-ICON_APP = "./data/icons/mcv_icon.ico"
-RECORD_FOLDER = "./Recordings"
-MCVCFG_PATH = "./data/config"
+RECORD_FOLDER = os.path.abspath("./Recordings")  # TODO: Make configurable in future
+MCVCFG_PATH = os.path.abspath("./data/config")
 MCVCFG_NAME = "config.json"
-MCVCFG_PATH_FULL = os.path.join(MCVCFG_PATH, MCVCFG_NAME)
+MCVCFG_PATH_FULL = os.path.normpath(os.path.join(MCVCFG_PATH, MCVCFG_NAME))
 MCVCFG_PROTO = {
     "cam_selected": "",
     "cam_list": {}
@@ -26,7 +26,7 @@ U_SYMBOLS = {
 
 
 class MCVConfig:
-    __logger = logging.getLogger('MCVConfig')
+    __logger = logging.getLogger('MCV.Config')
 
     @classmethod
     def initialize(cls):
@@ -139,7 +139,7 @@ class MCVConfig:
 
 
 class MCVVideoRecord:
-    __logger = logging.getLogger("MCV_VideoRecord")
+    __logger = logging.getLogger("MCV.VideoRecord")
 
     def __init__(self):
         self.is_recording = mp.Value('i', 0)

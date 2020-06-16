@@ -3,6 +3,7 @@
 __pycache__
 
 # Ignore log files
+MinimalistCamView/Logs
 *.log
 
 # Ignore MCV config folder
@@ -10,9 +11,6 @@ __pycache__
 
 # Ignore editable packages
 *.egg-info
-
-# Ignore temp config
-MinimalistCamView/temp_config.py
 
 # Ignore recorded files
 MinimalistCamView/Recordings

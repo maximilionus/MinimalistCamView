@@ -8,22 +8,33 @@ from PIL import Image, ImageTk
 from MinimalistCamView import helpers as h
 
 
-class MCV_UI(tk.Tk):
+class MCV_Gui(tk.Tk):
     HEXC_BG = "#262626"
     HEXC_BG_BRIGHTER = "#303030"
     HEXC_FG = "#cfcfcf"
 
     def __init__(self):
         super().__init__()
-        self.__logger = logging.getLogger('MCV_UI')
+        self.__logger = logging.getLogger('MCV.Gui')
         h.MCVConfig.initialize()
-        self.iconbitmap(h.ICON_APP)
+        self.__iconbitmap_universal(self)
         self.geometry("400x300")
         self.minsize(240, 200)
         self.createui__cam_view()
         self.__logger.info('User Interface is ready.')
 
         self.__pull_frame_loop_enabled = False
+
+    def __iconbitmap_universal(self, window: object, icon_image=h.ICON_APP):
+        """ Cross-platform icon loader for tkinter windows.
+
+        Args:
+            window (object): Window to apply icon to.
+            icon_image (str)(Optional): Path to icon image.
+        """
+        image_pil = Image.open(icon_image)
+        image_tk = ImageTk.PhotoImage(image_pil)
+        window.tk.call('wm', 'iconphoto', window._w, image_tk)
 
     def createui__cam_view(self):
         self.title(h.TITLE_STR)
@@ -162,7 +173,7 @@ class MCV_UI(tk.Tk):
         root.geometry('300x500')
         root.minsize(210, 96)
         root.title('Cams')
-        root.iconbitmap(h.ICON_APP)
+        self.__iconbitmap_universal(root)
         root.focus_force()
         root.protocol("WM_DELETE_WINDOW", on_close)
 
@@ -241,7 +252,7 @@ class MCV_UI(tk.Tk):
         str_button_confirm = "Create" if not cam_index else "Confirm"
 
         root = tk.Toplevel(self, bg=self.HEXC_BG)
-        root.iconbitmap(h.ICON_APP)
+        self.__iconbitmap_universal(root)
         root.geometry('300x100')
         root.minsize(187, 80)
         root.title(str_title)
@@ -281,5 +292,5 @@ class MCV_UI(tk.Tk):
 
 
 def run():
-    ui = MCV_UI()
+    ui = MCV_Gui()
     ui.mainloop()
