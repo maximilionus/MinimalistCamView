@@ -231,25 +231,25 @@ class MCV_Gui(tk.Tk):
 
         Args:
             cam_index (int, optional): Camera index if you want to edit existing camera.
-            If None - will use camera addition procedure.
-            Defaults to None.
+                If None - add new camera.
+                Defaults to None.
         """
         def apply_changes():
             name_get = cam_name_entry.get()
             address_get = cam_address_entry.get()
 
             if len(name_get.replace(' ', '')) > 0 and len(address_get.replace(' ', '')) > 0:
-                if cam_index: h.MCVConfig.cam_update(cam_index, name_get, address_get)
+                if cam_index is not None: h.MCVConfig.cam_update(cam_index, name_get, address_get)
                 else: h.MCVConfig.cam_add(name_get, address_get)
-                if update_cam_list_fnc: update_cam_list_fnc()
-                self.__logger.info("Сamera configuration was successfully " + ("updated" if cam_index else "created") + ".")
+                if update_cam_list_fnc is not None: update_cam_list_fnc()
+                self.__logger.info("Сamera configuration was successfully " + ("updated" if cam_index is not None else "created") + ".")
 
                 root.destroy()
             elif len(name_get.replace(' ', '')) == 0: cam_name_entry.delete(0, tk.END); cam_name_entry.insert(tk.END, "Can't be empty.")
             elif len(address_get.replace(' ', '')) == 0: cam_address_entry.delete(0, tk.END); cam_address_entry.insert(tk.END, "Can't be empty.")
 
-        str_title = "Create Camera" if not cam_index else f"Edit Camera [{cam_index}]"
-        str_button_confirm = "Create" if not cam_index else "Confirm"
+        str_title = "Create Camera" if cam_index is None else f"Edit Camera [{cam_index}]"
+        str_button_confirm = "Create" if cam_index is None else "Confirm"
 
         root = tk.Toplevel(self, bg=self.HEXC_BG)
         self.__iconbitmap_universal(root)
@@ -285,7 +285,7 @@ class MCV_Gui(tk.Tk):
         frame_bot.columnconfigure(0, weight=1)
 
         # Actions
-        if cam_index:
+        if cam_index is not None:
             cam_cfg = h.MCVConfig.cam_get(cam_index)
             cam_name_entry.insert(tk.END, cam_cfg.get("name", "No Name"))
             cam_address_entry.insert(tk.END, cam_cfg.get("address", "No Address"))
