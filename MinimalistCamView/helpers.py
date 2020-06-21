@@ -9,13 +9,14 @@ from time import strftime
 # CONST
 ICON_APP = os.path.abspath("./data/icons/mcv_icon.png")
 TITLE_STR = "Minimalist Cam View"
-RECORD_FOLDER = os.path.abspath("./Recordings")  # TODO: Make configurable in future
 MCVCFG_PATH = os.path.abspath("./data/config")
+DEF_RECORD_FOLDER = os.path.abspath("./Recordings")
 MCVCFG_NAME = "config.json"
 MCVCFG_PATH_FULL = os.path.normpath(os.path.join(MCVCFG_PATH, MCVCFG_NAME))
 MCVCFG_PROTO = {
     "cam_selected": "",
-    "cam_list": {}
+    "cam_list": {},
+    "record_folder": DEF_RECORD_FOLDER
 }
 U_SYMBOLS = {
     "play": "\u25B6",
@@ -146,10 +147,6 @@ class MCVVideoRecord:
         self.__logger.info("Object is ready.")
 
     def record(self):
-        if not os.path.exists(RECORD_FOLDER):
-            os.makedirs(RECORD_FOLDER)
-            self.__logger.info("Create folder for recordings")
-
         self.is_recording.value = 1
         mp.Process(target=self.record_process, args=(self.is_recording,), name="MCV Stream Recorder").start()
         self.__logger.info("Begin record in detached process.")
@@ -169,6 +166,12 @@ class MCVVideoRecord:
             h = int(stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
             return (w, h)
 
+        # Prepare output dir
+        record_folder = MCVConfig.get()["record_folder"]
+        if not os.path.exists(record_folder):
+            os.makedirs(record_folder)
+            cls.__logger.info(f"Create folder for recordings: < {record_folder} >")
+
         # Initialize Connection
         selected_cam = str(MCVConfig.get()['cam_selected'])
         cam_address = MCVConfig.cam_get(selected_cam)["address"]
@@ -176,7 +179,7 @@ class MCVVideoRecord:
         if not stream.isOpened(): return 1
 
         # Initialize Writer
-        record_name = f'{RECORD_FOLDER}/{strftime("%Y-%m-%d__%H-%M-%S")}.avi'
+        record_name = f'{record_folder}/{strftime("%Y-%m-%d__%H-%M-%S")}.avi'
         w, h = __get_frame_size()
         fourcc = cv2.VideoWriter_fourcc(*"DIVX")
         writer = cv2.VideoWriter(record_name, fourcc, 25, (w, h))
