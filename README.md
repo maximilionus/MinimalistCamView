@@ -10,4 +10,4 @@
 | :-------------- | :------------------------------------------------------- |
 | `--only-record` | Run MCV in non-gui mode and start the recording from cam |
 | `--quiet`       | Disable logging to file                                  |
-| `--verbose-log` | Log everything with level of logging set to `NOTSET`     |
+| `-v`            | Log everything with level of logging set to `NOTSET`     |
