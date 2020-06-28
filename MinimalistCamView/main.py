@@ -1,15 +1,15 @@
 import logging
 from time import strftime
 from sys import argv, exit as sysexit
-from os import mkdir
+from os import mkdir, chdir, path
 
 
-if __name__ == "__main__":
+def boot():
+    chdir(path.dirname(__file__))
     if "--quiet" not in argv:
         try: mkdir("./Logs")
         except FileExistsError: pass
-        loglevel = logging.NOTSET if "-v" in argv else logging.INFO
-        logging.basicConfig(filename=f'./Logs/MCV-{strftime("%Y-%m-%d__%H-%M-%S")}.log', filemode='w', level=loglevel, format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s")
+        logging.basicConfig(filename=f'./Logs/MCV-{strftime("%Y-%m-%d__%H-%M-%S")}.log', filemode='w', format="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s")
     logger = logging.getLogger("MCV.Boot")
 
     if '--only-record' in argv:

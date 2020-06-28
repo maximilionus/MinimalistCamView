@@ -7,6 +7,9 @@ packages = [
     { include = "./MinimalistCamView" },
 ]
 
+[tool.poetry.scripts]
+mcv = "MinimalistCamView.main:boot"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 opencv-python = "^4.2.0"
